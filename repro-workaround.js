@@ -1,13 +1,13 @@
 const jspb = require('google-protobuf');
 
-// Get a reference to the decoder's prototype
+// Patch the decoder's readString to always use fatal=false
+// This works because readStringRequireUtf8 calls decoder_.readString(length, true)
+// and we intercept it to force fatal=false
 const tempReader = new jspb.BinaryReader(new Uint8Array([0]));
 const decoderProto = Object.getPrototypeOf(tempReader.decoder_);
 const originalDecoderReadString = decoderProto.readString;
 
-// Patch the decoder's readString to always use fatal=false
 decoderProto.readString = function(length, fatal) {
-  // Force fatal to false to allow invalid UTF-8
   return originalDecoderReadString.call(this, length, false);
 };
 
